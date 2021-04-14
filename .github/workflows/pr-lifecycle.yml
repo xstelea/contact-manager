@@ -1,0 +1,42 @@
+name: PR lifecycle
+
+on:
+  pull_request:
+    branches:
+      - '*'
+    types: [opened, synchronize, closed]
+
+jobs:
+  trigger-pipeline:
+    runs-on: ubuntu-latest
+    name: Trigger devops pipeline
+    steps:
+      - uses: actions/github-script@0.9.0
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `#### Sandbox URL: https://kombinera-sandbox.azurewebsites.net/${{ github.event.pull_request.number }}/index.html`
+            })
+      - name: Trigger pipeline
+        env:
+          AZURE_DEVOPS_EXT_PAT: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          IS_MERGED: ${{ github.event.pull_request.merged }}
+          TRIGGER_ACTION: ${{ github.event.action }}
+          GITHUB_REF: ${{ github.GITHUB_REF }}
+        run: |
+          echo "The PR is triggered by $TRIGGER_ACTION"
+          echo "The PR number is $PR_NUMBER"
+          echo "The PR is merged $IS_MERGED"
+          echo "Github Ref $GITHUB_REF"
+          az pipelines run \
+            --id 41 \
+            --project kombinera \
+            --organization "https://dev.azure.com/iissab-ipex/" \
+            --branch $GITHUB_REF \
+            --variables GH_TRIGGER_ACTION=$TRIGGER_ACTION GH_PR_NUMBER=$PR_NUMBER GH_IS_MERGED=$IS_MERGED
