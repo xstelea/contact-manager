@@ -47,5 +47,8 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     'import/no-cycle': 'off',
     'react/jsx-boolean-value': 'off',
+    'max-classes-per-file': 'off',
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    'react/jsx-props-no-spreading': 'off',
   },
 };

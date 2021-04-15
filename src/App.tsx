@@ -1,17 +1,24 @@
 import React, { FunctionComponent, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { useRouter } from './hooks';
+import { useDispatch, useSelector } from 'react-redux';
+import { AuthPage } from './auth/AuthPage';
+import { ContactsPage } from './contacts/ContactsPage';
 import { settingsAction } from './settings/settings.store';
+import { getHasInitiated, getIsAuthenticated } from './store/rootReducer';
 
-const App: FunctionComponent = ({ children }) => {
+const App: FunctionComponent = () => {
   const dispatch = useDispatch();
-  const router = useRouter<{ locale: string }>();
+  const hasInitiated = useSelector(getHasInitiated);
+  const isAuthenticated = useSelector(getIsAuthenticated);
 
   useEffect(() => {
     dispatch(settingsAction.bootstrapApplication());
   }, []);
 
-  return <>{children}</>;
+  return (
+    <div className="bg-gray-800 w-screen h-screen text-white text-center flex justify-center">
+      {hasInitiated && <>{isAuthenticated ? <ContactsPage /> : <AuthPage />}</>}
+    </div>
+  );
 };
 
 export default App;

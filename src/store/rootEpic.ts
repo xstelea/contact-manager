@@ -1,17 +1,19 @@
 import { combineEpics } from 'redux-observable';
-import { Observable } from 'rxjs';
-import { ajax } from 'rxjs/ajax';
+
+import { authEpic, createEncryptedStoreEpic } from '../auth/auth.epics';
+import { authService } from '../auth/auth.service';
+import { updateStoreEpic } from '../contacts/contact.epics';
 import { bootstrapApplicationEpic } from '../settings/settings.epics';
 
-export const rootEpic = combineEpics(bootstrapApplicationEpic);
+export const rootEpic = combineEpics(
+  bootstrapApplicationEpic,
+  authEpic,
+  createEncryptedStoreEpic,
+  updateStoreEpic,
+);
 
 export interface IEpicDependencies {
-  getJSON: <T>(
-    url: string,
-    headers?: Record<string, string | undefined> | undefined,
-  ) => Observable<T>;
+  authService: ReturnType<typeof authService>;
 }
 
-export const dependencies: IEpicDependencies = {
-  getJSON: ajax.getJSON,
-};
+export const dependencies: IEpicDependencies = { authService: authService() };
